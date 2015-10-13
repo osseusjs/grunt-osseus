@@ -1,4 +1,4 @@
-# grunt-osseus-to-db
+# grunt-osseus
 
 > A Grunt plugin to make the Osseus JS static site generator function.
 
