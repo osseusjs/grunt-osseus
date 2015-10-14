@@ -11,15 +11,14 @@
 var mongoose    = require('mongoose');
 var Schema      = mongoose.Schema;
 
-
 /* Creating User Schema */
 var PostSchema  = new Schema({
-  content: 'String',
-  excerpt: 'String',
-  filename: 'String',
-  category: 'String',
-  tags: 'Array',
-  posted_date: 'Date'
+  content: String,
+  excerpt: String,
+  filename: String,
+  category: String,
+  tags: Array,
+  posted_date: Date
 });
 
 
