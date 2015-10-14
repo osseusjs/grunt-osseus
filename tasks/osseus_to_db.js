@@ -60,6 +60,7 @@ module.exports = function(grunt) {
             post.category = yamlFrontMatter.category;
             post.tags = yamlFrontMatter.tags;
             post.title = post.filename.substring(11).split('.')[0]; 
+            post.posted_date = new Date(post.filename.substring(0, 10));
             
             Post.findOne({title: post.title}, function(err, result) {
               if (err)
@@ -79,6 +80,8 @@ module.exports = function(grunt) {
                   errs.push('category');
                 if (arraysEqual(result.tags, post.tags)) {
                   errs.push('tags');
+                if (result.posted_date !== post.posted_date)
+                  errs.push('posted_date');
                 }
 
                 if (errs.length > 0) {
