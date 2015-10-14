@@ -37,6 +37,7 @@ module.exports = function(grunt) {
     });
 
     var fileObj = {};
+    var parser = this.options().parser;
 
     this.files.forEach(function(file) {
       function createRecurse () {
@@ -53,7 +54,9 @@ module.exports = function(grunt) {
             var post = new Post();
             var fileContents = grunt.file.read(file);
             var yamlFrontMatter = yamlFront.loadFront(fileContents);
-            post.content = markdown.toHTML(yamlFrontMatter.__content, 'Gruber');
+            if (parser === 'markdown') {
+              post.content = markdown.toHTML(yamlFrontMatter.__content, 'Gruber');
+            }
             var excerpt = post.content.split(/\n\n/g);
             post.excerpt = excerpt[0] + (excerpt[1] ? excerpt[1] : '');
             post.filename = file.split('/').pop();
