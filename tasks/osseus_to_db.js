@@ -13,37 +13,59 @@ module.exports = function(grunt) {
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  grunt.registerMultiTask('osseus_to_db', 'A Grunt plugin to make the Osseus JS static site generator function.', function() {
-    // Merge task-specific and/or target-specific options with these defaults.
+  var markdown  = require('markdown').markdown;
+  var yamlFront = require('yaml-front-matter');     // will parse through files and pull out the YAML frontmatter
+  var mongoose  = require('mongoose');
+  var Post      = require('../models/post.js');
+
+  grunt.registerMultiTask('osseus_to_db', 'Grunt plugin to read YAML frontmatter and insert data into a database via an API url.', function() {
+    var done = this.async();    // telling Grunt this is going to involve asynchronous tasks
+    mongoose.connect('mongodb://localhost/osseus');
+
     var options = this.options({
-      punctuation: '.',
-      separator: ', '
+      encoding: 'utf-8'
     });
 
-    // Iterate over all specified file groups.
-    this.files.forEach(function(f) {
-      // Concat specified files.
-      var src = f.src.filter(function(filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
-        if (!grunt.file.exists(filepath)) {
-          grunt.log.warn('Source file "' + filepath + '" not found.');
-          return false;
+    var fileObj = {};
+
+    this.files.forEach(function(file) {
+      function createRecurse () {
+        var newFiles = file.src.filter(function(filepath){
+          if (filepath.split('/').pop() !== '.gitignore') {
+            return true;
+          } else {
+            return false;
+          }
+        });
+
+        if (newFiles.length > 0) {
+          newFiles.forEach(function(file, index, arr) {
+            var post = new Post();
+            var fileContents = grunt.file.read(file);
+            var yamlFrontMatter = yamlFront.loadFront(fileContents);
+            post.content = markdown.toHTML(yamlFrontMatter.__content, 'Gruber');
+            var excerpt = yamlFrontMatter.content.split(/\n\n/g);
+            post.excerpt = excerpt[0] + (excerpt[1] ? excerpt[1] : '');
+            post.filename = file.split('/').pop();
+            post.category = yamlFrontMatter.category;
+            post.tags = yamlFrontMatter.tags;
+
+            
+            post.save(function(err, post) {
+              if (err)
+                console.log(err);
+            });
+
+            if (index === newFiles.length - 1)
+              done();
+          
+          });
         } else {
-          return true;
+          done();
         }
-      }).map(function(filepath) {
-        // Read file source.
-        return grunt.file.read(filepath);
-      }).join(grunt.util.normalizelf(options.separator));
+      }
 
-      // Handle options.
-      src += options.punctuation;
-
-      // Write the destination file.
-      grunt.file.write(f.dest, src);
-
-      // Print a success message.
-      grunt.log.writeln('File "' + f.dest + '" created.');
+      createRecurse();
     });
   });
 
