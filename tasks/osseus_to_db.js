@@ -7,16 +7,16 @@
  */
 
 'use strict';
+var markdown  = require('markdown').markdown;
+var yamlFront = require('yaml-front-matter');     // will parse through files and pull out the YAML frontmatter
+var mongoose  = require('mongoose');
+var Post      = require('../models/post.js');
 
 module.exports = function(grunt) {
 
   // Please see the Grunt documentation for more information regarding task
   // creation: http://gruntjs.com/creating-tasks
 
-  var markdown  = require('markdown').markdown;
-  var yamlFront = require('yaml-front-matter');     // will parse through files and pull out the YAML frontmatter
-  var mongoose  = require('mongoose');
-  var Post      = require('../models/post.js');
 
   grunt.registerMultiTask('osseus_to_db', 'Grunt plugin to read YAML frontmatter and insert data into a database via an API url.', function() {
     var done = this.async();    // telling Grunt this is going to involve asynchronous tasks

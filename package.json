@@ -1,7 +1,7 @@
 {
   "name": "grunt-osseus",
   "description": "A Grunt plugin to make the Osseus JS static site generator function.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "homepage": "https://github.com/osseusjs/grunt-osseus",
   "author": {
     "name": "Andy McGuinness",
@@ -39,6 +39,8 @@
     "gruntplugin"
   ],
   "dependencies": {
-    "mongoose": "^4.1.11"
+    "markdown": "^0.5.0",
+    "mongoose": "^4.1.11",
+    "yaml-front-matter": "^3.2.3"
   }
 }
