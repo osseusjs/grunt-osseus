@@ -1,5 +1,5 @@
 /*
- * grunt-osseus-to-db
+ * grunt-osseus
  * https://github.com/osseusjs/grunt-osseus
  *
  * Copyright (c) 2015 Andy McGuinness

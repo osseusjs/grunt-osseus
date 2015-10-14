@@ -1,5 +1,5 @@
 {
-  "name": "grunt-osseus-to-db",
+  "name": "grunt-osseus",
   "description": "A Grunt plugin to make the Osseus JS static site generator function.",
   "version": "0.1.0",
   "homepage": "https://github.com/osseusjs/grunt-osseus",
@@ -37,5 +37,8 @@
   },
   "keywords": [
     "gruntplugin"
-  ]
+  ],
+  "dependencies": {
+    "mongoose": "^4.1.11"
+  }
 }
