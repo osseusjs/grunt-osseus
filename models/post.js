@@ -18,7 +18,8 @@ var PostSchema  = new Schema({
   filename: String,
   category: String,
   tags: Array,
-  posted_date: Date
+  posted_date: Date,
+  title: String
 });
 
 

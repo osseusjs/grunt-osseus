@@ -1,6 +1,6 @@
 /*
- * grunt-osseus-to-db
- * https://github.com/amcguinness/grunt-osseus-to-db
+ * grunt-osseus
+ * https://github.com/amcguinness/grunt-osseus
  *
  * Copyright (c) 2015 Andy McGuinness
  * Licensed under the MIT license.
@@ -11,6 +11,16 @@ var markdown  = require('markdown').markdown;
 var yamlFront = require('yaml-front-matter');     // will parse through files and pull out the YAML frontmatter
 var mongoose  = require('mongoose');
 var Post      = require('../models/post.js');
+
+function arraysEqual(arr1, arr2) {
+  if(arr1.length !== arr2.length)
+    return false;
+  for(var i = arr1.length; i--;) {
+    if(arr1[i] !== arr2[i])
+      return false;
+  }
+  return true;
+}
 
 module.exports = function(grunt) {
 
@@ -44,23 +54,66 @@ module.exports = function(grunt) {
             var fileContents = grunt.file.read(file);
             var yamlFrontMatter = yamlFront.loadFront(fileContents);
             post.content = markdown.toHTML(yamlFrontMatter.__content, 'Gruber');
-            var excerpt = yamlFrontMatter.content.split(/\n\n/g);
+            var excerpt = post.content.split(/\n\n/g);
             post.excerpt = excerpt[0] + (excerpt[1] ? excerpt[1] : '');
             post.filename = file.split('/').pop();
             post.category = yamlFrontMatter.category;
             post.tags = yamlFrontMatter.tags;
-
+            post.title = post.filename.substring(11).split('.')[0]; 
             
-            post.save(function(err, post) {
+            Post.findOne({title: post.title}, function(err, result) {
               if (err)
-                console.log(err);
+                console.log(err)
+
+              if (result) {
+                var errs    = [],
+                    updates = {};
+                
+                if (result.content !== post.content)
+                  errs.push('content');
+                if (result.excerpt !== post.excerpt)
+                  errs.push('excerpt');
+                if (result.filename !== post.filename)
+                  errs.push('filename');
+                if (result.category !== post.category)
+                  errs.push('category');
+                if (arraysEqual(result.tags, post.tags)) {
+                  errs.push('tags');
+                }
+
+                if (errs.length > 0) {
+                  for (var i = 0; i < errs.length; i++) {
+                    updates[errs[i]] = post[errs[i]];
+                  }
+
+                  Post.update({title: post.title}, updates, {multi: true}, function (err, numAffected) {
+                    if (err)
+                      console.log(err);
+
+                    if (index === newFiles.length - 1)
+                      mongoose.disconnect();
+                      done();
+                  });
+                } else {
+                  if (index === newFiles.length - 1)
+                    mongoose.disconnect();
+                    done();
+                }
+              } else {
+                post.save(function(err, post) {
+                  if (err)
+                    console.log(err);
+                  if (index === newFiles.length - 1)
+                    mongoose.disconnect();
+                    done();
+                });
+              }
             });
 
-            if (index === newFiles.length - 1)
-              done();
-          
+
           });
         } else {
+          mongoose.disconnect();
           done();
         }
       }
@@ -68,5 +121,4 @@ module.exports = function(grunt) {
       createRecurse();
     });
   });
-
 };
